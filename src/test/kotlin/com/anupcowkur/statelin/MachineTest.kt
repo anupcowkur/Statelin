@@ -1,6 +1,5 @@
 package com.anupcowkur.statelin
 
-import io.kotlintest.matchers.fail
 import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -9,212 +8,177 @@ class MachineTest : StringSpec() {
 
     init {
 
-        "Should add transitions" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
-            val state3 = State3("John", "Smith")
-            val state4 = State4(24f)
+        "Should add trigger handlers" {
+            val stateA = State("A")
+            val stateB = State("B")
 
-            val action1 = Action1("John")
-            val action2 = Action2(36.0)
-            val action3 = Action3("John", "Smith")
-            val action4 = Action4(24f)
+            val triggerX = Trigger("TriggerX")
+            val triggerY = Trigger("TriggerY")
 
-            val machine = Machine(state1)
+            val machine = Machine(stateA)
 
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
-            machine.addTransition(Transition(state2, action3, state3, { _, _, _ -> }))
-            machine.addTransition(Transition(state3, action4, state4, { _, _, _ -> }))
-            machine.addTransition(Transition(state4, action1, state1, { _, _, _ -> }))
-            machine.transitions.size shouldBe 4
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
+            machine.addTriggerHandler(TriggerHandler(stateB, triggerY, { _, _ -> }))
+            machine.eventHandlers.size shouldBe 2
         }
 
-        "Should add children" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
-            val state3 = State3("John", "Smith")
+        "Should throw exception on duplicate trigger handlers" {
+            val stateA = State("A")
 
-            val machine = Machine(state1)
-            val childMachine1 = Machine(state2)
-            val childMachine2 = Machine(state3)
+            val triggerX = Trigger("TriggerX")
 
-            machine.addChildMachine(childMachine1)
-            machine.addChildMachine(childMachine2)
-            machine.children.size shouldBe 2
-        }
+            val machine = Machine(stateA)
 
-
-        "Should throw exception on duplicate transition in this machine" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
-
-            val action2 = Action2(36.0)
-
-            val machine = Machine(state1)
-
-            // valid transition added to current machine
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
+            // Add valid trigger handler
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
 
             val exception = shouldThrow<IllegalArgumentException> {
-                // same transition added again to current machine
-                machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
+                // Add same trigger handler again
+                machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
             }
 
-            exception.message shouldBe "Transition $state1 -> $action2 -> $state2 is already added"
-        }
+            exception.message shouldBe "TriggerHandler $stateA -> $triggerX is already added"
 
-        "Should throw exception on adding duplicate transition in child machine" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
+            val subStateA = State("subStateA")
+            stateA.subStates.add(subStateA)
 
-            val action2 = Action2(36.0)
+            // Add valid sub-state trigger handler
+            machine.addTriggerHandler(TriggerHandler(subStateA, triggerX, { _, _ -> }))
 
-            val machine = Machine(state1)
-
-            // valid transition added to current machine
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
-
-            val childMachine = Machine(state1)
-
-            // Child added to current machine. Child has no duplicate transitions yet so
-            // shouldn't throw exception here.
-            machine.addChildMachine(childMachine)
-
-            val exception = shouldThrow<IllegalArgumentException> {
-                // Duplicate transition added to child. Should throw exception here.
-                childMachine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
+            val subStateException = shouldThrow<IllegalArgumentException> {
+                // Add same sub-state trigger handler again
+                machine.addTriggerHandler(TriggerHandler(subStateA, triggerX, { _, _ -> }))
             }
 
-            exception.message shouldBe "Transition $state1 -> $action2 -> $state2 is already added"
+            subStateException.message shouldBe "TriggerHandler $subStateA -> $triggerX is already added"
         }
 
-        "Should check duplicate transitions while adding child machine" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
+        "Should invoke trigger handler on trigger" {
+            val stateA = State("A")
 
-            val action2 = Action2(36.0)
+            val triggerX = Trigger("TriggerX")
 
-            val machine = Machine(state1)
-
-            // valid transition added to current machine
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
-
-            val childMachine = Machine(state1)
-            // duplicate transition added to child
-            childMachine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
-
-            val exception = shouldThrow<IllegalArgumentException> {
-                // Should throw exception when child is added to current machine
-                machine.addChildMachine(childMachine)
-            }
-
-            exception.message shouldBe "Transition $state1 -> $action2 -> $state2 is already added"
-        }
-
-
-        "Should invoke transition callback on trigger" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
-
-            val action2 = Action2(36.0)
-
-            val machine = Machine(state1)
+            val machine = Machine(stateA)
 
             var invocationCounter = 0
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> invocationCounter++ }))
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> invocationCounter++ }))
 
-            machine.trigger(action2)
+            machine.trigger(triggerX)
 
             invocationCounter shouldBe 1
         }
 
-        "Should return true if trigger is handled in current machine" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
+        "Should invoke onEnter on state entry" {
+            var invocationCounter = 0
+            val stateA = State("A", onEnter = { invocationCounter++ })
+            val stateB = State("B", onEnter = { invocationCounter++ })
 
-            val action2 = Action2(36.0)
+            // Initial state is A
+            val machine = Machine(stateA)
 
-            val machine = Machine(state1)
+            // onEnter should be called
+            invocationCounter shouldBe 1
 
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
+            // Set same state
+            machine.state = stateA
 
-            val result = machine.trigger(action2)
+            // onEnter should not be called
+            invocationCounter shouldBe 1
 
-            result shouldBe true
+            // Set different state
+            machine.state = stateB
+
+            // onEnter should be called
+            invocationCounter shouldBe 2
         }
 
-        "Should return true if trigger is handled in child machine" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
+        "Should invoke onEnter on sub state entry" {
+            var invocationCounter = 0
+            val stateA = State("A")
+            val subStateA = State("subStateA", onEnter = { invocationCounter++ })
 
-            val action2 = Action2(36.0)
+            // Initial state is A
+            val machine = Machine(stateA)
 
-            val machine = Machine(state1)
-            val childMachine = Machine(state1)
-            machine.addChildMachine(childMachine)
+            // Set same state
+            machine.state = stateA
 
-            childMachine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
+            // onEnter should not be called
+            invocationCounter shouldBe 0
 
-            val result = machine.trigger(action2)
+            // Set sub state
+            machine.state = subStateA
 
-            result shouldBe true
+            // onEnter should be called
+            invocationCounter shouldBe 1
         }
 
-        "Should return false if trigger is not handled in current machine" {
-            val state1 = State1("John")
+        "Should invoke onExit on state exit" {
+            var invocationCounter = 0
+            val stateA = State("A", onExit = { invocationCounter++ })
+            val stateB = State("B")
 
-            val action2 = Action2(36.0)
+            // Initial state is A
+            val machine = Machine(stateA)
 
-            val machine = Machine(state1)
+            // onExit should not be called
+            invocationCounter shouldBe 0
 
-            val result = machine.trigger(action2)
+            // Set same state
+            machine.state = stateA
 
-            result shouldBe false
+            // onExit should not be called
+            invocationCounter shouldBe 0
+
+            // Set different state
+            machine.state = stateB
+
+            // onExit should be called
+            invocationCounter shouldBe 1
         }
 
-        "Should return false if trigger is not handled by current machine or it's children" {
-            val state1 = State1("John")
+        "Should invoke onExit on sub state exit" {
+            var invocationCounter = 0
+            val stateA = State("A")
+            val subStateA = State("subStateA", onExit = { invocationCounter++ })
 
-            val action2 = Action2(36.0)
+            stateA.subStates.add(subStateA)
 
-            val machine = Machine(state1)
-            val childMachine = Machine(state1)
-            machine.addChildMachine(childMachine)
+            // Initial state is A
+            val machine = Machine(stateA)
 
-            val result = machine.trigger(action2)
+            // Set sub state
+            machine.state = subStateA
 
-            result shouldBe false
+            // Go back to stateA
+            machine.state = stateA
+
+            // onExit should be called
+            invocationCounter shouldBe 1
         }
 
-        "Should pass trigger to child if not handled" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
 
-            val action2 = Action2(36.0)
+        "Should set new state" {
+            var invocationCounter = 0
+            val stateA = State("A")
+            val stateB = State("B")
 
-            val machine = Machine(state1)
+            // Initial state is A
+            val machine = Machine(stateA)
 
-            var childMachineInvocationCounter = 0
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> childMachineInvocationCounter++ }))
+            machine.state shouldBe stateA
 
-            machine.trigger(action2)
+            // Set same state
+            machine.state = stateA
 
-            childMachineInvocationCounter shouldBe 1
-        }
+            // onExit should not be called
+            machine.state shouldBe stateA
 
-        "Should set new state on trigger" {
-            val state1 = State1("John")
-            val state2 = State2(36.0)
+            // Set different state
+            machine.state = stateB
 
-            val action2 = Action2(36.0)
-
-            val machine = Machine(state1)
-
-            machine.addTransition(Transition(state1, action2, state2, { _, _, _ -> }))
-
-            machine.trigger(action2)
-
-            machine.state shouldBe state2
+            // onExit should be called
+            machine.state shouldBe stateB
         }
 
     }

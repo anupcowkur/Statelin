@@ -1,3 +1,5 @@
 package com.anupcowkur.statelin
 
-abstract class State
+class State(private val name: String, internal val onEnter: (() -> Unit)? = null, internal val onExit: (() -> Unit)? = null) {
+    val subStates = mutableListOf<State>()
+}

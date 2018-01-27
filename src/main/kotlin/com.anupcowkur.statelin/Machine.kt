@@ -1,37 +1,34 @@
 package com.anupcowkur.statelin
 
 class Machine(state: State) {
-
     var state: State = state
-        private set
-
-    internal val transitions = mutableListOf<Transition>()
-
-    internal val children = mutableListOf<Machine>()
-
-    fun addTransition(transition: Transition) {
-        if (isDuplicateTransition(transition)) {
-            throw IllegalArgumentException("Transition ${transition.oldState} -> ${transition.action} -> ${transition.newState} is already added")
+        set(value) {
+            if (state == value) {
+                return
+            }
+            
+            state.onExit?.invoke()
+            field = value
+            state.onEnter?.invoke()
         }
 
-        transitions.add(transition)
+    internal val eventHandlers = mutableListOf<TriggerHandler>()
+
+    init {
+        state.onEnter?.invoke()
     }
 
-    private fun isDuplicateTransition(transition: Transition): Boolean {
-        if (isDuplicateTransitionInThisMachine(transition)) {
-            return true
+    fun addTriggerHandler(triggerHandler: TriggerHandler) {
+        if (isDuplicateTransition(triggerHandler)) {
+            throw IllegalArgumentException("TriggerHandler ${triggerHandler.state} -> ${triggerHandler.trigger} is already added")
         }
 
-        if (isDuplicateTransitionInChildMachine(transition)) {
-            return true
-        }
-
-        return false
+        eventHandlers.add(triggerHandler)
     }
 
-    private fun isDuplicateTransitionInThisMachine(transition: Transition): Boolean {
-        transitions.forEach({
-            if (it.oldState == transition.oldState && it.action == transition.action && it.newState == transition.newState) {
+    private fun isDuplicateTransition(triggerHandler: TriggerHandler): Boolean {
+        eventHandlers.forEach({
+            if (it.state == triggerHandler.state && it.trigger == triggerHandler.trigger) {
                 return true
             }
         })
@@ -39,50 +36,13 @@ class Machine(state: State) {
         return false
     }
 
-    private fun isDuplicateTransitionInChildMachine(transition: Transition): Boolean {
-        children.forEach({
-            return it.isDuplicateTransition(transition)
-        })
-
-        return false
-    }
-
-    fun addChildMachine(childMachine: Machine) {
-        children.add(childMachine)
-    }
-
-    fun trigger(action: Action): Boolean {
-        if (handleTriggerInThisMachine(action)) {
-            return true
-        }
-
-        if (handleTriggerInChildMachine(action)) {
-            return true
-        }
-
-        return false
-    }
-
-    private fun handleTriggerInThisMachine(action: Action): Boolean {
-        transitions.forEach({
-            if (it.oldState == state && it.action == action) {
-                it.onTransition(state, it.action, it.newState)
-                state = it.newState
-                return true
+    fun trigger(trigger: Trigger) {
+        eventHandlers.forEach({
+            if (it.state == state && it.trigger == trigger) {
+                it.handler(state, it.trigger)
+                return
             }
         })
-
-        return false
-    }
-
-    private fun handleTriggerInChildMachine(action: Action): Boolean {
-        children.forEach({
-            if (it.trigger(action)) {
-                return true
-            }
-        })
-
-        return false
     }
 
 }

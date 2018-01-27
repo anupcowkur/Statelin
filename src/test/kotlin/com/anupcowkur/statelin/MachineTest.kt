@@ -51,6 +51,8 @@ class MachineTest : StringSpec() {
             }
 
             subStateException.message shouldBe "TriggerHandler $subStateA -> $triggerX is already added"
+
+            // TODO: Implement concept of parent so that this exception message can say something like parentState.childState -> triggerX is already added
         }
 
         "Should invoke trigger handler on trigger" {

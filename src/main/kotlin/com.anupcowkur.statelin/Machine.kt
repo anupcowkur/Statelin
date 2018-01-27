@@ -6,7 +6,7 @@ class Machine(state: State) {
             if (state == value) {
                 return
             }
-            
+
             state.onExit?.invoke()
             field = value
             state.onEnter?.invoke()

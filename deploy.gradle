@@ -1,0 +1,49 @@
+apply plugin: 'com.jfrog.bintray'
+apply from: 'keystore.gradle'//the file, containing the bintray API key
+ext {
+    groupId = 'com.anupcowkur'
+    artifactId = "statelin"
+    libVersion = "0.1.0"
+}
+version = libVersion
+group = groupId
+bintray {
+    user = 'anupcowkur' // Your bintray User
+    key = bintray_key // Defined in keystore.gradle file
+    configurations = ['archives']
+    publish = true
+    pkg {
+        repo = "maven"
+        name = "statelin"
+        version {
+            name = libVersion
+        }
+    }
+}
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging 'jar'
+            groupId groupId
+            artifactId artifactId
+            version libVersion
+            name artifactId
+        }
+    }
+}
+
+//just copy paste the lines below
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}

@@ -17,8 +17,9 @@ class MachineTest : StringSpec() {
 
             val machine = Machine(stateA)
 
-            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
-            machine.addTriggerHandler(TriggerHandler(stateB, triggerY, { _, _ -> }))
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, {}))
+            machine.addTriggerHandler(TriggerHandler(stateB, triggerY, {}))
+            
             machine.eventHandlers.size shouldBe 2
         }
 
@@ -30,11 +31,11 @@ class MachineTest : StringSpec() {
             val machine = Machine(stateA)
 
             // Add valid trigger handler
-            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, {}))
 
             val exception = shouldThrow<IllegalArgumentException> {
                 // Add same trigger handler again
-                machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> }))
+                machine.addTriggerHandler(TriggerHandler(stateA, triggerX, {}))
             }
 
             exception.message shouldBe "TriggerHandler $stateA -> $triggerX is already added"
@@ -48,7 +49,7 @@ class MachineTest : StringSpec() {
             val machine = Machine(stateA)
 
             var invocationCounter = 0
-            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { _, _ -> invocationCounter++ }))
+            machine.addTriggerHandler(TriggerHandler(stateA, triggerX, { invocationCounter++ }))
 
             machine.trigger(triggerX)
 

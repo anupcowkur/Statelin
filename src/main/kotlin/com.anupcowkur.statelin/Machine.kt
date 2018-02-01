@@ -39,7 +39,7 @@ class Machine(state: State) {
     fun trigger(trigger: Trigger) {
         eventHandlers.forEach({
             if (it.state == state && it.trigger == trigger) {
-                it.handler(state, it.trigger)
+                it.handler.invoke()
                 return
             }
         })

@@ -1,4 +1,6 @@
-# Statelin
+# Statelin 
+[![CircleCI](https://circleci.com/gh/anupcowkur/statelin.svg?style=svg&circle-token=1ded70d2f302eaa1ca4a304c084d8d3ef9c7171d)](https://circleci.com/gh/anupcowkur/statelin)
+
 Statelin is a finite state machine implemented purely in Kotlin.
 
 # Installation

@@ -33,13 +33,12 @@ install {
     }
 }
 
-//just copy paste the lines below
 task sourcesJar(type: Jar) {
     classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
+    from sourceSets.main.kotlin.srcDirs
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: dokka) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }

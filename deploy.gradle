@@ -9,8 +9,8 @@ ext {
 version = libVersion
 group = groupId
 bintray {
-    user = 'anupcowkur' // Your bintray User
-    key = bintray_key // Defined in keystore.gradle file
+    user = 'anupcowkur'
+    key = bintray_key
     configurations = ['archives']
     publish = true
     pkg {

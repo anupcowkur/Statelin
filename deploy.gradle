@@ -1,6 +1,5 @@
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
-apply from: 'keystore.gradle'
 ext {
     groupId = 'com.anupcowkur'
     artifactId = "statelin"
@@ -10,7 +9,7 @@ version = libVersion
 group = groupId
 bintray {
     user = 'anupcowkur'
-    key = bintray_key
+    key = System.getenv('BINTRAY_KEY')
     configurations = ['archives']
     publish = true
     pkg {

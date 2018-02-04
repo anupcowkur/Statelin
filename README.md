@@ -7,6 +7,14 @@ Statelin is a finite state machine implemented purely in Kotlin.
 
 MAVEN
 ```
+<repositories>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+</repositories>
+```
+```
 <dependency>
   <groupId>com.anupcowkur</groupId>
   <artifactId>anupcowkur</artifactId>
@@ -15,6 +23,11 @@ MAVEN
 ```
 GRADLE
 
+```
+repositories {
+    jcenter()
+}
+```
 ```
 compile 'com.anupcowkur:statelin:0.1.0'
 ```

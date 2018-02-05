@@ -6,7 +6,8 @@ Statelin is a finite state machine implemented purely in Kotlin.
 # Installation
 
 MAVEN
-```
+
+```xml
 <repositories>
     <repository>
       <id>jcenter</id>
@@ -14,45 +15,52 @@ MAVEN
     </repository>
 </repositories>
 ```
-```
+
+```xml
 <dependency>
   <groupId>com.anupcowkur</groupId>
   <artifactId>anupcowkur</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```
+
 GRADLE
 
-```
+```groovy
 repositories {
     jcenter()
 }
 ```
-```
+
+```groovy
 compile 'com.anupcowkur:statelin:0.1.0'
 ```
 
 # Usage
 Create a machine with an initial state:
-```
+
+```kotlin
 val stateA = State("A")
 val machine = Machine(stateA)
 ```
 
 Create a new state with optional enter and exit callbacks:
-```
+
+```kotlin
 val stateB = State(name = "B",
                     onEnter = { print("Entering state B") },
                     onExit = { print("Exiting state B") })
 ```
 
 Transition from A to B:
-```
+
+```kotlin
 machine.state = stateB // "Entering state B" will be printed
 ```
 
 Add a trigger with a handler:
-```
+
+```kotlin
 val onSubmitClick = Trigger("onSubmitClick")
 machine.addTriggerHandler(TriggerHandler(stateB, onSubmitClick, {
                 // Do whatever. Handle business logic, set a new state etc
@@ -77,7 +85,8 @@ Let's model an autocompleting search box like google search.
 - If new text is entered, we will trigger `onTextEntered` again and the process repeats.
 
 Our states will be:
-```
+
+```kotlin
 val stateInit = State("Init")
 val stateShowingResults = State(name = "Showing results",
         onEnter = {
@@ -92,14 +101,15 @@ val stateLoading = State(name = "Loading",
 ```
 
 Our triggers will be:
-```
+
+```kotlin
 val triggerOnTextEntered = Trigger("onTextEntered")
 ```
 
 
 And here's our machine and trigger handlers:
 
-```
+```kotlin
 val machine = Machine(stateInit)
 
 machine.addTriggerHandler(TriggerHander(stateInit, triggerOnTextEntered, {
@@ -120,10 +130,8 @@ State machines are useful simply because it's easier to program for what's possi
  than to defend against all the things that should not be possible.
  
 # Contributing
+
 You can report bugs in the issues tracker. Please add a sample app
  with a minimal test case that reproduces the bug you are reporting.
  
 Feature requests are also welcome, preferably with a pull request and tests :-)
-
-
-  

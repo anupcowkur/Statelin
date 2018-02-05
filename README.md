@@ -19,7 +19,7 @@ MAVEN
 ```xml
 <dependency>
   <groupId>com.anupcowkur</groupId>
-  <artifactId>anupcowkur</artifactId>
+  <artifactId>statelin</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```

@@ -24,7 +24,8 @@ class MachineTest : StringSpec() {
         }
 
         "Should throw exception on duplicate trigger handlers" {
-            val stateA = State("A")
+            val stateA = State("A", {}, {})
+            val stateADuplicate = State("A", {}, {})
 
             val triggerX = Trigger("TriggerX")
 
@@ -35,7 +36,7 @@ class MachineTest : StringSpec() {
 
             val exception = shouldThrow<IllegalArgumentException> {
                 // Add same trigger handler again
-                machine.addTriggerHandler(TriggerHandler(stateA, triggerX, {}))
+                machine.addTriggerHandler(TriggerHandler(stateADuplicate, triggerX, {}))
             }
 
             exception.message shouldBe "TriggerHandler $stateA -> $triggerX is already added"

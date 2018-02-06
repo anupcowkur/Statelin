@@ -112,10 +112,10 @@ And here's our machine and trigger handlers:
 ```kotlin
 val machine = Machine(stateInit)
 
-machine.addTriggerHandler(TriggerHander(stateInit, triggerOnTextEntered, {
+machine.addTriggerHandler(TriggerHandler(stateInit, triggerOnTextEntered, {
     machine.state = stateLoading
 }))
-machine.addTriggerHandler(TriggerHander(stateShowingResults, triggerOnTextEntered, {
+machine.addTriggerHandler(TriggerHandler(stateShowingResults, triggerOnTextEntered, {
     machine.state = stateLoading
 }))
 ```

@@ -12,28 +12,16 @@ class Machine(state: State) {
             state.onEnter?.invoke()
         }
 
-    internal val eventHandlers = mutableListOf<TriggerHandler>()
+    internal val eventHandlers = mutableSetOf<TriggerHandler>()
 
     init {
         state.onEnter?.invoke()
     }
 
     fun addTriggerHandler(triggerHandler: TriggerHandler) {
-        if (isDuplicateTransition(triggerHandler)) {
+        if (!eventHandlers.add(triggerHandler)) {
             throw IllegalArgumentException("TriggerHandler ${triggerHandler.state} -> ${triggerHandler.trigger} is already added")
         }
-
-        eventHandlers.add(triggerHandler)
-    }
-
-    private fun isDuplicateTransition(triggerHandler: TriggerHandler): Boolean {
-        eventHandlers.forEach({
-            if (it.state == triggerHandler.state && it.trigger == triggerHandler.trigger) {
-                return true
-            }
-        })
-
-        return false
     }
 
     fun trigger(trigger: Trigger) {

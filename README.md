@@ -1,3 +1,9 @@
+# Deprecated
+This library is now deprecated.
+
+1. There's now a [better library](https://github.com/Tinder/StateMachine) implemented by the folks at Tinder
+2. FSMs for UI programming can be used without any library at all as described by [this blog post](https://robots.thoughtbot.com/finite-state-machines-android-kotlin-good-times)
+
 # Statelin 
 [![CircleCI](https://circleci.com/gh/anupcowkur/statelin.svg?style=svg&circle-token=1ded70d2f302eaa1ca4a304c084d8d3ef9c7171d)](https://circleci.com/gh/anupcowkur/statelin)
 
